@@ -1,6 +1,7 @@
-#include "../../glad/glad.h"
-#include "../../include/Shader.hpp"
+#include <glad/glad.h>
+
 #include <GLFW/glfw3.h>
+#include <core/Shader.hpp>
 #include <iostream>
 
 int fbWidth, fbHeight;
