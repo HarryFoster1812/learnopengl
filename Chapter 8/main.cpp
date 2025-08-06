@@ -2,11 +2,15 @@
 
 #include <GLFW/glfw3.h>
 #include <core/Shader.hpp>
+#include <core/Texture.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
-#include <stb/stb_image.h>
 
 int fbWidth, fbHeight;
 double mouseX = 0, mouseY = 0;
+float rotation_angle = 90.0f;
 
 // call back function which resizes the viewport when the window is resized
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
@@ -27,6 +31,18 @@ void cursor_position_callback(GLFWwindow *window, double xpos, double ypos) {
 
   mouseX = xpos * scaleX;
   mouseY = fbHeight - ypos * scaleY; // flip y
+}
+
+void processInput(GLFWwindow *window) {
+  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    glfwSetWindowShouldClose(window, true);
+
+  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+    rotation_angle -= 1.0f;
+  }
+  if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+    rotation_angle += 1.0f;
+  }
 }
 
 int main(int argc, char *argv[]) {
@@ -73,6 +89,7 @@ int main(int argc, char *argv[]) {
       0, 1, 3, // first triangle
       1, 2, 3  // second triangle
   };
+
   // create a buffer that will be stored on the GPU
   unsigned int VBO, VAO, EBO;
   glGenVertexArrays(1, &VAO);
@@ -95,73 +112,50 @@ int main(int argc, char *argv[]) {
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
 
-  // setting the texture wrapping
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-
-  // setting the texture filtering nearest produces a definate pixel color
-  // linear mixes all of the other colors together
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-  // after creating a texure we can use: to create the mipmaps for scaling
-  // glGenerateMipmaps
-
   // load texture image
-  int width, height, nrChannels;
-  unsigned char *data =
-      stbi_load("../textures/container.jpg", &width, &height, &nrChannels, 0);
-
-  unsigned int texture;
-  glGenTextures(1, &texture);
-  glBindTexture(GL_TEXTURE_2D, texture);
-
-  if (data) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-                 GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-  } else {
-    std::cout << "Failed to load texture" << std::endl;
-  }
-
-  int width1, height1, nrChannels1;
-  stbi_set_flip_vertically_on_load(true);
-  unsigned char *data1 = stbi_load("../textures/awesomeface.png", &width1,
-                                   &height1, &nrChannels1, 0);
-
-  unsigned int texture1;
-  glGenTextures(1, &texture1);
-  glBindTexture(GL_TEXTURE_2D, texture1);
-
-  if (data1) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width1, height1, 0, GL_RGBA,
-                 GL_UNSIGNED_BYTE, data1);
-    glGenerateMipmap(GL_TEXTURE_2D);
-  } else {
-    std::cout << "Failed to load second texture" << std::endl;
-  }
+  Texture container_texture("../textures/container.jpg");
+  container_texture.setWrap(GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT);
+  container_texture.setFilter(GL_NEAREST, GL_LINEAR);
+  Texture face_texture("../textures/awesomeface.png", GL_TEXTURE_2D,
+                       GL_TEXTURE1, true);
 
   shader.use();
   shader.setInt("texture0", 0); // or with shader class
   shader.setInt("texture1", 1); // or with shader class
 
+  glm::mat4 model = glm::mat4(1.0f);
+  model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+  glm::mat4 view = glm::mat4(1.0f);
+  // note that we’re translating the scene in the reverse direction
+  view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+  glm::mat4 projection;
+  projection =
+      glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+
+  shader.use();
+  shader.setMat4("model", model);
+  shader.setMat4("view", view);
+  shader.setMat4("projection", projection);
+
   double xpos, ypos;
   // basic render loop
   while (!glfwWindowShouldClose(window)) {
-
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     // Convert cursor position from window coords to framebuffer coords if
     // needed:
-
+    processInput(window);
     shader.use();
+
     shader.setVec2("mouse_pos", mouseX, mouseY);
+
     // bind textures on corresponding texture units
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, texture1);
+
+    container_texture.bind();
+    face_texture.bind();
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

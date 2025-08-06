@@ -2,8 +2,10 @@
 #include <iostream>
 #include <stb/stb_image.h>
 
-Texture::Texture(const std::string &path, GLenum textureType, bool flip)
-    : type(textureType), width(0), height(0), nrChannels(0) {
+Texture::Texture(const std::string &path, GLenum textureType,
+                 GLenum textureUnit, bool flip)
+    : type(textureType), textureUnit(textureUnit), width(0), height(0),
+      nrChannels(0) {
 
   glGenTextures(1, &ID);
   glBindTexture(type, ID);
@@ -43,7 +45,7 @@ Texture::Texture(const std::string &path, GLenum textureType, bool flip)
 
 Texture::~Texture() { glDeleteTextures(1, &ID); }
 
-void Texture::bind(GLenum textureUnit) const {
+void Texture::bind() const {
   glActiveTexture(textureUnit);
   glBindTexture(type, ID);
 }

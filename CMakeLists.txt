@@ -18,7 +18,7 @@ set(SOURCES
     src/stb/stb_image.cpp
     src/core/Shader.cpp
     src/core/Texture.cpp
-    Chapter\ 7/Ex\ 4/main.cpp
+    Chapter\ 8/main.cpp
 )
 
 add_executable(main ${SOURCES})
