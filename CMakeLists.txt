@@ -18,12 +18,13 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/include/stb
 )
 
+file(GLOB CORE_SOURCES src/core/*.cpp)
+
 # Source files
 set(SOURCES
     src/glad/glad.c
     src/stb/stb_image.cpp
-    src/core/Shader.cpp
-    src/core/Texture.cpp
+    ${CORE_SOURCES}
     ${MAIN_PATH}
 )
 
