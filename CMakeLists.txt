@@ -3,6 +3,12 @@ project(main)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(MAIN_PATH "" CACHE STRING "Path to the main.cpp file to compile")
+
+# Error if no path is set
+if (NOT MAIN_PATH)
+    message(FATAL_ERROR "MAIN_PATH is not set. Please pass -DMAIN_PATH=...")
+endif()
 
 # Include headers
 include_directories(
@@ -18,7 +24,7 @@ set(SOURCES
     src/stb/stb_image.cpp
     src/core/Shader.cpp
     src/core/Texture.cpp
-    Chapter\ 8/main.cpp
+    ${MAIN_PATH}
 )
 
 add_executable(main ${SOURCES})
