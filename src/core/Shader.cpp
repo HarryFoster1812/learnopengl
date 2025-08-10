@@ -100,3 +100,17 @@ void Shader::setVec4(const std::string &name, float x, float y, float z,
 void Shader::setMat4(const std::string &name, const glm::mat4 &mat) {
   glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, &mat[0][0]);
 }
+
+// GLM overloads
+
+void Shader::setVec2(const std::string &name, const glm::vec2 &vec) {
+  setVec2(name, vec.x, vec.y);
+}
+
+void Shader::setVec3(const std::string &name, const glm::vec3 &vec) {
+  setVec3(name, vec.x, vec.y, vec.z);
+}
+
+void Shader::setVec4(const std::string &name, const glm::vec4 &vec) {
+  setVec4(name, vec.x, vec.y, vec.z, vec.w);
+}

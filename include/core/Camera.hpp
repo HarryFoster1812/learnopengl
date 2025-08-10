@@ -46,7 +46,7 @@ protected:
   // Camera options
   float MovementSpeed = 2.5f;
   float MouseSensitivity = 0.1f;
-  float Zoom = 1.0f;
+  float Zoom = 90.0f;
 
   // Updates the camera vectors based on the updated Euler angles
   void updateCameraVectors();

@@ -3,13 +3,10 @@
 uniform vec2 mouse_pos;    // in pixels, Y already flipped
 uniform vec2 window_res;   // in pixels
 
-uniform vec3 objectColor;
-uniform vec3 lightColor;
-
 out vec4 FragColor;
 
 void main()
 {
 
-    FragColor = vec4(lightColor * objectColor, 1.0);
+    FragColor = vec4(1.0);
 }
