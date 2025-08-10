@@ -1,3 +1,0 @@
-/home/harryfoster/personalgit/opengl/Chapter 12/CMakeFiles/main.dir
-/home/harryfoster/personalgit/opengl/Chapter 12/CMakeFiles/edit_cache.dir
-/home/harryfoster/personalgit/opengl/Chapter 12/CMakeFiles/rebuild_cache.dir
