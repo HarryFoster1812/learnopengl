@@ -16,14 +16,19 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/include/core
     ${PROJECT_SOURCE_DIR}/include/glad
     ${PROJECT_SOURCE_DIR}/include/stb
+    ${PROJECT_SOURCE_DIR}/include/imgui
 )
 
 file(GLOB CORE_SOURCES src/core/*.cpp)
+file(GLOB IMGUI_SOIRCES ${PROJECT_SOURCE_DIR}/include/imgui/*.cpp)
+file(GLOB IMGUI_BACKEND_SOIRCES ${PROJECT_SOURCE_DIR}/include/imgui/backends/*.cpp)
 
 # Source files
 set(SOURCES
     src/glad/glad.c
     src/stb/stb_image.cpp
+    ${IMGUI_SOIRCES}
+    ${IMGUI_BACKEND_SOIRCES}
     ${CORE_SOURCES}
     ${MAIN_PATH}
 )
