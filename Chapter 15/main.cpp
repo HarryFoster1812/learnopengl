@@ -121,30 +121,37 @@ int main(int argc, char *argv[]) {
 
   // define the triangle vertices
   float vertices[] = {
+      // positions          // normals           // texture coords
       -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f,  0.0f,  0.5f,  -0.5f,
       -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f,  0.0f,  0.5f,  0.5f,  -0.5f, 0.0f,
       0.0f,  -1.0f, 1.0f,  1.0f,  0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f,
       1.0f,  1.0f,  -0.5f, 0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f,  1.0f,
-      -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f,  0.0f,  -0.5f, -0.5f,
-      0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,  0.5f,  -0.5f, 0.5f,  0.0f,
-      0.0f,  1.0f,  1.0f,  0.0f,  0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-      1.0f,  1.0f,  0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-      -0.5f, 0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,  -0.5f, -0.5f,
-      0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  -1.0f,
-      0.0f,  0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, -1.0f, 0.0f,  0.0f,
-      1.0f,  1.0f,  -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,
-      -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  -0.5f, -0.5f,
-      0.5f,  -1.0f, 0.0f,  0.0f,  0.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  -1.0f,
-      0.0f,  0.0f,  1.0f,  0.0f,  0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-      1.0f,  0.0f,  0.5f,  0.5f,  -0.5f, 1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-      0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.0f,  1.0f,  0.5f,  -0.5f,
-      -0.5f, 1.0f,  0.0f,  0.0f,  0.0f,  1.0f,  0.5f,  -0.5f, 0.5f,  1.0f,
-      0.0f,  0.0f,  0.0f,  0.0f,  0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-      1.0f,  0.0f,  -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.0f,  1.0f,
-      0.5f,  -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  1.0f,  1.0f,  0.5f,  -0.5f,
-      0.5f,  0.0f,  -1.0f, 0.0f,  1.0f,  0.0f,  0.5f,  -0.5f, 0.5f,  0.0f,
-      -1.0f, 0.0f,  1.0f,  0.0f,  -0.5f, -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,
-      0.0f,  0.0f,  -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.0f,  1.0f,
+      -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f,  0.0f,
+
+      -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,  0.5f,  -0.5f,
+      0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,  0.5f,  0.5f,  0.5f,  0.0f,
+      0.0f,  1.0f,  1.0f,  1.0f,  0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+      1.0f,  1.0f,  -0.5f, 0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+      -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+
+      -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,
+      -0.5f, -1.0f, 0.0f,  0.0f,  1.0f,  1.0f,  -0.5f, -0.5f, -0.5f, -1.0f,
+      0.0f,  0.0f,  0.0f,  1.0f,  -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,
+      0.0f,  1.0f,  -0.5f, -0.5f, 0.5f,  -1.0f, 0.0f,  0.0f,  0.0f,  0.0f,
+      -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
+
+      0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.5f,  0.5f,
+      -0.5f, 1.0f,  0.0f,  0.0f,  1.0f,  1.0f,  0.5f,  -0.5f, -0.5f, 1.0f,
+      0.0f,  0.0f,  0.0f,  1.0f,  0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,
+      0.0f,  1.0f,  0.5f,  -0.5f, 0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+      0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+      -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.0f,  1.0f,  0.5f,  -0.5f,
+      -0.5f, 0.0f,  -1.0f, 0.0f,  1.0f,  1.0f,  0.5f,  -0.5f, 0.5f,  0.0f,
+      -1.0f, 0.0f,  1.0f,  0.0f,  0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,
+      1.0f,  0.0f,  -0.5f, -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  0.0f,  0.0f,
+      -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.0f,  1.0f,
+
       -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.5f,  0.5f,
       -0.5f, 0.0f,  1.0f,  0.0f,  1.0f,  1.0f,  0.5f,  0.5f,  0.5f,  0.0f,
       1.0f,  0.0f,  1.0f,  0.0f,  0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
@@ -152,10 +159,9 @@ int main(int argc, char *argv[]) {
       -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f};
 
   // create a buffer that will be stored on the GPU
-  unsigned int VBO, VAO, EBO;
+  unsigned int VBO, VAO;
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
-  // glGenBuffers(1, &EBO);
 
   // bind GL_ARRAY_BUFFER to point to the VBO buffer
   glBindVertexArray(VAO);
@@ -163,30 +169,30 @@ int main(int argc, char *argv[]) {
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
   // 3. copy our index array in a element buffer for OpenGL to use
-  // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
-  //              GL_STATIC_DRAW);
   // 4. then set the vertex attributes pointers
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
                         (void *)(3 * sizeof(float)));
 
   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                        (void *)(5 * sizeof(float)));
+                        (void *)(6 * sizeof(float)));
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
   glEnableVertexAttribArray(2);
 
   // load texture image
-  // Texture container_texture("../textures/container.jpg");
-  // container_texture.setWrap(GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT);
-  // container_texture.setFilter(GL_NEAREST, GL_LINEAR);
-  // Texture face_texture("../textures/awesomeface.png", GL_TEXTURE_2D,
-  //                      GL_TEXTURE1, true);
+  Texture container_texture("../textures/container2.png", GL_TEXTURE_2D,
+                            GL_TEXTURE0, true);
 
-  // shader.use();
-  // shader.setInt("texture0", 0); // or with shader class
-  // shader.setInt("texture1", 1); // or with shader class
+  Texture container_texture_specular("../textures/container2_specular.png",
+                                     GL_TEXTURE_2D, GL_TEXTURE1, true);
+
+  container_texture.setWrap(GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT);
+  container_texture.setFilter(GL_NEAREST, GL_LINEAR);
+
+  lightingShader.use();
+  lightingShader.setInt("material.diffuse", 0);  // or with shader class
+  lightingShader.setInt("material.specular", 1); // or with shader class
 
   glm::mat4 model = glm::mat4(1.0f);
 
@@ -201,13 +207,10 @@ int main(int argc, char *argv[]) {
   lightingShader.setMat4("projection", projection);
   lightingShader.setMat4("view", view);
 
-  lightingShader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
-  lightingShader.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
-  lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
-  lightingShader.setFloat("material.shininess", 32.0f);
+  lightingShader.setFloat("material.shininess", 64.0f);
 
   lightingShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
-  lightingShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f); // darkened
+  lightingShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
   lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
   glEnable(GL_DEPTH_TEST);
@@ -238,21 +241,15 @@ int main(int argc, char *argv[]) {
     projection = glm::perspective(glm::radians(camera.getZoom()),
                                   fbWidth / fbHeight, 0.1f, 100.0f);
 
-    glm::vec3 lightColor;
-    lightColor.x = sin(glfwGetTime() * 2.0f);
-    lightColor.y = sin(glfwGetTime() * 0.7f);
-    lightColor.z = sin(glfwGetTime() * 1.3f);
-    glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
-    glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
-    lightingShader.setVec3("light.ambient", ambientColor);
-    lightingShader.setVec3("light.diffuse", diffuseColor);
-
+    glm::vec3 lightColor = glm::vec3(1.0f);
     lightingShader.setMat4("projection", projection);
     lightingShader.setVec3("lightPos", lightPos);
     lightingShader.setVec3("viewPos", camera.getPosition());
 
     // bind textures on corresponding texture units
 
+    container_texture.bind();
+    container_texture_specular.bind();
     // container_texture.bind();
     // face_texture.bind();
 
@@ -262,7 +259,6 @@ int main(int argc, char *argv[]) {
     lightShader.use();
     lightShader.setMat4("view", view);
     lightShader.setMat4("projection", projection);
-    lightShader.setVec3("lightColour", lightColor);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     glBindVertexArray(0);
@@ -275,7 +271,6 @@ int main(int argc, char *argv[]) {
   // close and clean any memory used
   glDeleteVertexArrays(1, &VAO);
   glDeleteBuffers(1, &VBO);
-  glDeleteBuffers(1, &EBO);
   glfwTerminate();
   return 0;
 }
