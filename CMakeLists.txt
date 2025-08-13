@@ -39,9 +39,11 @@ add_executable(main ${SOURCES})
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(glm CONFIG REQUIRED)
+find_package(assimp CONFIG REQUIRED)
 
 target_link_libraries(main
     OpenGL::GL
     glfw
     glm::glm-header-only
+    assimp::assimp
 )

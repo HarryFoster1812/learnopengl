@@ -1,29 +1,24 @@
-#ifndef TEXTURE_HPP
-#define TEXTURE_HPP
+#pragma once
 
 #include <glad/glad.h>
 #include <string>
 
 class Texture {
 public:
+  Texture();
   Texture(const std::string &path, GLenum textureType = GL_TEXTURE_2D,
-          GLenum textureUnit = GL_TEXTURE0, bool flip = true);
-  ~Texture();
+          bool flip = true);
 
-  void bind() const;
+  void bind(GLenum textureUnit) const;
   void unbind() const;
 
   void setWrap(GLenum s, GLenum t);
   void setFilter(GLenum minFilter, GLenum magFilter);
 
   GLuint getID() const { return ID; }
-  GLenum getUnit() const { return textureUnit; }
 
 private:
-  GLuint ID;
-  GLenum textureUnit;
+  GLuint ID = 0;
   GLenum type;
   int width, height, nrChannels;
 };
-
-#endif

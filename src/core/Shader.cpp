@@ -114,3 +114,13 @@ void Shader::setVec3(const std::string &name, const glm::vec3 &vec) {
 void Shader::setVec4(const std::string &name, const glm::vec4 &vec) {
   setVec4(name, vec.x, vec.y, vec.z, vec.w);
 }
+
+void Shader::setFloatArray(const std::string &name, const float *values,
+                           int count) {
+  GLint location = glGetUniformLocation(ID, name.c_str());
+  if (location == -1) {
+    std::cerr << "Warning: uniform '" << name << "' not found or not used.\n";
+    return;
+  }
+  glUniform1fv(location, count, values);
+}
