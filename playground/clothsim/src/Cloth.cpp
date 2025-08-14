@@ -41,8 +41,8 @@ Cloth::Cloth(float clothWidth, float clothHeight, int numPointsWidth,
       }
 
       points[idx] = Point(pos.x, pos.y, pos.z);
-      // if (y == 0)
-      //   points[idx].pin(); // Pin top row
+      if (y == 0)
+        points[idx].pin(); // Pin top row
 
       vertexArray[idx].position = pos;
       // vertexArray[idx].normal = glm::vec3(0.0f, 0.0f, 1.0f);
@@ -91,7 +91,7 @@ Cloth::Cloth(float clothWidth, float clothHeight, int numPointsWidth,
   glBindVertexArray(VAO);
 
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, vertexArray.capacity() * sizeof(Vertex),
+  glBufferData(GL_ARRAY_BUFFER, vertexArray.capacity() * sizeof(RenderVertex),
                vertexArray.data(), GL_DYNAMIC_DRAW);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
@@ -99,12 +99,13 @@ Cloth::Cloth(float clothWidth, float clothHeight, int numPointsWidth,
                lineIndices.size() * sizeof(unsigned int), lineIndices.data(),
                GL_DYNAMIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(RenderVertex),
+                        (void *)0);
   glEnableVertexAttribArray(0);
-  // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+  // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(RenderVertex),
   //                       (void *)offsetof(Vertex, normal));
   // glEnableVertexAttribArray(1);
-  // glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+  // glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(RenderVertex),
   //                       (void *)offsetof(Vertex, texCoords));
   // glEnableVertexAttribArray(2);
 
@@ -133,8 +134,11 @@ void Cloth::updateVertices() {
     // Optional: compute normal (skipped here)
     // vertexArray[i].normal = glm::vec3(0.0f, 0.0f, 1.0f);
   }
+
+  glBindVertexArray(VAO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferSubData(GL_ARRAY_BUFFER, 0, vertexArray.size() * sizeof(Vertex),
+  glBufferSubData(GL_ARRAY_BUFFER, 0,
+                  vertexArray.capacity() * sizeof(RenderVertex),
                   vertexArray.data());
 
   // Update line indices if springs broken

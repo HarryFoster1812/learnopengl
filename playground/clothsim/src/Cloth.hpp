@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 
-struct Vertex {
+struct RenderVertex {
   glm::vec3 position;
   // glm::vec3 normal;
   // glm::vec2 texCoords;
@@ -26,7 +26,7 @@ private:
   float spacing;
   std::vector<Point> points;
   std::vector<Spring> springs;
-  std::vector<Vertex> vertexArray;
+  std::vector<RenderVertex> vertexArray;
   std::vector<unsigned int> lineIndices;
 
   unsigned int VAO = 0, VBO = 0, EBO = 0;

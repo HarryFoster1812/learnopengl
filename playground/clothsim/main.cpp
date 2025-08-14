@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
               3,                 // number of points horizontally
               10,                // number of points vertically
               0.0f, 0.5f, -0.5f, // offsets
-              ClothPlane::XZ);
+              ClothPlane::XY);
 
   while (!glfwWindowShouldClose(window)) {
     float currentFrame = static_cast<float>(glfwGetTime());
@@ -155,9 +155,9 @@ int main(int argc, char *argv[]) {
     lightingShader.setMat4("model", model);
 
     cloth.setMatrices(projection, view, model);
-    // cloth.run(deltaTime, 0.01f, glm::vec3(0.0f, -9.01f, 0.0f), 200.0f, 0.2f,
-    //           mouseState, static_cast<int>(fbWidth),
-    //           static_cast<int>(fbHeight));
+    cloth.run(deltaTime, 0.01f, glm::vec3(0.0f, -0.01f, 0.0f), 200.0f, 0.2f,
+              mouseState, static_cast<int>(fbWidth),
+              static_cast<int>(fbHeight));
     cloth.render();
 
     glfwSwapBuffers(window);
