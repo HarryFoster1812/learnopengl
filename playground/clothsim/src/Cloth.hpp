@@ -9,8 +9,8 @@
 
 struct RenderVertex {
   glm::vec3 position;
-  // glm::vec3 normal;
-  // glm::vec2 texCoords;
+  glm::vec3 normal;
+  glm::vec2 texCoords;
 };
 
 enum class ClothPlane {

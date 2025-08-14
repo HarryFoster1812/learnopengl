@@ -57,7 +57,7 @@ void Point::update(float deltaTime, float drag, const glm::vec3 &acceleration,
   glm::vec2 point2D(screenPos.x,
                     float(windowHeight) - screenPos.y); // Flip y if needed
 
-  glm::vec2 mouseDir = point2D - mouseState.pos;
+  glm::vec2 mouseDir = point2D - glm::vec2(windowWidth / 2, windowHeight / 2);
   float mouseDist = glm::length(mouseDir);
   isSelected = mouseDist < 20.0f; // Selection radius in pixels
 

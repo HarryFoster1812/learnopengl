@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include <cstdlib>
+#include <glm/ext/vector_float2.hpp>
 #include <iostream>
 
 #include "./src/Cloth.hpp"
@@ -72,7 +73,7 @@ int main(int argc, char *argv[]) {
   clothShader.use();
   clothShader.setVec3("colour", clothColour);
 
-  Shader floorShader("shaders/vertex.vert", "shaders/fragment.frag");
+  Shader floorShader("shaders/vertex.vert", "shaders/floorfragment.frag");
   floorShader.use();
   floorShader.setVec3("colour", floorColour);
 
@@ -116,6 +117,7 @@ int main(int argc, char *argv[]) {
     clothShader.setMat4("projection", projection);
     clothShader.setMat4("view", view);
     clothShader.setMat4("model", model);
+    clothShader.setVec2("u_resolution", glm::vec2(fbWidth, fbHeight));
 
     cloth.setMatrices(projection, view, model);
     if (!isSimPaused)
@@ -149,24 +151,26 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 }
 
 void cursor_position_callback(GLFWwindow *window, double xpos, double ypos) {
-
   if (cursorEnabled)
     return;
 
-  (void)window;
   if (mouseState.firstMouse) {
-    mouseState.lastPos.x = static_cast<float>(xpos);
-    mouseState.lastPos.y = static_cast<float>(ypos);
+    mouseState.lastPos = {static_cast<float>(xpos), static_cast<float>(ypos)};
     mouseState.firstMouse = false;
+    return;
   }
 
   float xoffset = static_cast<float>(xpos) - mouseState.lastPos.x;
   float yoffset = mouseState.lastPos.y - static_cast<float>(ypos);
 
-  mouseState.lastPos = mouseState.pos;
-  mouseState.pos = {static_cast<float>(xpos), static_cast<float>(ypos)};
+  mouseState.lastPos = {static_cast<float>(xpos), static_cast<float>(ypos)};
 
   camera.processMouseMovement(xoffset, yoffset);
+
+  // Keep logical cursor in screen center for picking
+  int width, height;
+  glfwGetWindowSize(window, &width, &height);
+  mouseState.pos = {width / 2.0f, height / 2.0f};
 }
 
 void toggleCursor(GLFWwindow *window) {

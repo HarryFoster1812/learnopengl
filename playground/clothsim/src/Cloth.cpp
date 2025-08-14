@@ -53,10 +53,10 @@ Cloth::Cloth(float clothWidth, float clothHeight, int numPointsWidth,
       }
 
       vertexArray[idx].position = pos;
-      // vertexArray[idx].normal = glm::vec3(0.0f, 0.0f, 1.0f);
-      // vertexArray[idx].texCoords =
-      //     glm::vec2(static_cast<float>(x) / (numWidth - 1),
-      //               static_cast<float>(y) / (numHeight - 1));
+      vertexArray[idx].normal = glm::vec3(0.0f, 0.0f, 1.0f);
+      vertexArray[idx].texCoords =
+          glm::vec2(static_cast<float>(x) / (numWidth - 1),
+                    static_cast<float>(y) / (numHeight - 1));
       std::cout << "(" << vertexArray[idx].position.x << ", " // x
                 << vertexArray[idx].position.y << ", "        // y
                 << vertexArray[idx].position.z                // x
@@ -110,12 +110,12 @@ Cloth::Cloth(float clothWidth, float clothHeight, int numPointsWidth,
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(RenderVertex),
                         (void *)0);
   glEnableVertexAttribArray(0);
-  // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(RenderVertex),
-  //                       (void *)offsetof(Vertex, normal));
-  // glEnableVertexAttribArray(1);
-  // glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(RenderVertex),
-  //                       (void *)offsetof(Vertex, texCoords));
-  // glEnableVertexAttribArray(2);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(RenderVertex),
+                        (void *)offsetof(RenderVertex, normal));
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(RenderVertex),
+                        (void *)offsetof(RenderVertex, texCoords));
+  glEnableVertexAttribArray(2);
 
   glBindVertexArray(0);
 }
@@ -140,7 +140,7 @@ void Cloth::updateVertices() {
   for (size_t i = 0; i < points.size(); ++i) {
     vertexArray[i].position = points[i].GetPosition();
     // Optional: compute normal (skipped here)
-    // vertexArray[i].normal = glm::vec3(0.0f, 0.0f, 1.0f);
+    vertexArray[i].normal = glm::vec3(0.0f, 0.0f, 1.0f);
   }
 
   glBindVertexArray(VAO);
