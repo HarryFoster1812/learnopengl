@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
 
   // define the triangle vertices
 
-  Model earthModel("../models/nyc block 6/NYC_Set_6_C4D/NYC_Blocks_06.c4d");
+  Model earthModel("../models/backpack/backpack.obj");
 
   glEnable(GL_DEPTH_TEST);
   // render loop
@@ -147,6 +147,27 @@ int main(int argc, char *argv[]) {
     glm::mat4 view = camera.getViewMatrix();
     lightingShader.setMat4("projection", projection);
     lightingShader.setMat4("view", view);
+
+    lightingShader.setVec3("viewPos", camera.getPosition());
+    lightingShader.setFloat("shininess", 32.0f);
+
+    // be sure to activate shader when setting uniforms/drawing objects
+    lightingShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+    lightingShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+    lightingShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+    lightingShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+
+    lightingShader.setVec3("spotLight.position", camera.getPosition());
+    lightingShader.setVec3("spotLight.direction", camera.getFront());
+    lightingShader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
+    lightingShader.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
+    lightingShader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
+    lightingShader.setFloat("spotLight.constant", 1.0f);
+    lightingShader.setFloat("spotLight.linear", 0.09f);
+    lightingShader.setFloat("spotLight.quadratic", 0.032f);
+    lightingShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+    lightingShader.setFloat("spotLight.outerCutOff",
+                            glm::cos(glm::radians(15.0f)));
 
     // world transformation
 

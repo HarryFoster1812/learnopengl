@@ -10,6 +10,15 @@ if (NOT MAIN_PATH)
     message(FATAL_ERROR "MAIN_PATH is not set. Please pass -DMAIN_PATH=...")
 endif()
 
+# Enable 
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=address)
+endif()
+
+# Add debug symbols
+add_compile_options(-g)
+
 # Include headers
 include_directories(
     ${PROJECT_SOURCE_DIR}/include

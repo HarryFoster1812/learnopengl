@@ -12,40 +12,37 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices,
 
 // render the mesh
 void Mesh::Draw(Shader &shader) {
+  // bind appropriate textures
   shader.use();
-
-  // Set diffuse count and weights (example: equal weights)
-  int diffuseCount = 0;
-  float diffuseWeights[8] = {0};
-
   unsigned int diffuseNr = 1;
+  unsigned int specularNr = 1;
+  unsigned int normalNr = 1;
+  unsigned int heightNr = 1;
   for (unsigned int i = 0; i < textures.size(); i++) {
     std::string number;
     std::string name = textures[i].type;
+    if (name == "texture_diffuse")
+      number = std::to_string(diffuseNr++);
+    else if (name == "texture_specular")
+      number = std::to_string(specularNr++); // transfer unsigned int to string
+    else if (name == "texture_normal")
+      number = std::to_string(normalNr++); // transfer unsigned int to string
+    else if (name == "texture_height")
+      number = std::to_string(heightNr++); // transfer unsigned int to string
 
-    if (name == "texture_diffuse") {
-      number = std::to_string(diffuseNr);
-      diffuseNr++;
-
-      // Set weights (simple example: equal weight)
-      diffuseWeights[diffuseNr - 2] =
-          1.0f; // diffuseNr started at 1, array at 0
-    }
-
-    // Set the sampler uniform (texture_diffuse1, texture_specular1, etc.)
+    // now set the sampler to the correct texture unit
     shader.setInt((name + number).c_str(), i);
+    // and finally bind the texture
     textures[i].texture.bind(GL_TEXTURE0 + i);
   }
 
-  // Set diffuse count and weights uniforms
-  shader.setInt("diffuseCount", diffuseNr - 1);
-  shader.setFloatArray("diffuseWeights", diffuseWeights, diffuseNr - 1);
-
-  // Draw call
+  // draw mesh
   glBindVertexArray(VAO);
   glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()),
                  GL_UNSIGNED_INT, 0);
   glBindVertexArray(0);
+
+  // always good practice to set everything back to defaults once configured.
   glActiveTexture(GL_TEXTURE0);
 }
 
