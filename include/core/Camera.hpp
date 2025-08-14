@@ -23,6 +23,10 @@ public:
   void setYaw(float yaw);
   void setPitch(float pitch);
   void setZoom(float zoom);
+  void setMovementSpeed(float newSpeed) { MovementSpeed = newSpeed; }
+  void setMouseSensitivity(float newSensitivity) {
+    MouseSensitivity = newSensitivity;
+  }
 
   // Getters
   glm::vec3 getPosition() const;

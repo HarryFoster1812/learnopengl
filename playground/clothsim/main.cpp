@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "./src/Cloth.hpp"
+#include "./src/Floor.hpp"
 #include "./src/Mouse.hpp"
 #include <core/Camera.hpp>
 #include <core/Shader.hpp>
@@ -16,7 +17,7 @@
 
 float fbWidth = 800.0f, fbHeight = 600.0f;
 
-Camera camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f,
+Camera camera(glm::vec3(0.0f, 20.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f,
               0.0f);
 
 float deltaTime = 0.0f;
@@ -121,16 +122,35 @@ int main(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
   GLFWwindow *window = setup();
+  camera.setMovementSpeed(10.0f);
 
-  Shader lightingShader("shaders/vertex.vert", "shaders/fragment.frag");
+  glm::vec3 clothColour = glm::vec3(1.0f);
+  glm::vec3 floorColour = glm::vec3(1.0f, 0.0f, 0.0f);
+
+  Shader clothShader("shaders/vertex.vert", "shaders/fragment.frag");
+  clothShader.use();
+  clothShader.setVec3("colour", clothColour);
+
+  Shader floorShader("shaders/vertex.vert", "shaders/fragment.frag");
+  floorShader.use();
+  floorShader.setVec3("colour", floorColour);
 
   // 4m x 2m cloth, 100 points across, 50 points down
-  Cloth cloth(-0.5f,             // physical width
-              0.5f,              // physical height
-              3,                 // number of points horizontally
-              10,                // number of points vertically
-              0.0f, 0.5f, -0.5f, // offsets
-              ClothPlane::XY);
+  float clothWidth = 50.0f;
+  float clothHeight = 50.0f;
+  float xOffset = -25.0f;
+  float yOffset = 20.0f;
+  float zOffset = -50.0f;
+
+  Cloth cloth(clothWidth,                // physical width in world units
+              clothHeight,               // physical height in world units
+              60,                        // points horizontally
+              60,                        // points vertically
+              xOffset, yOffset, zOffset, // offsets in world space
+              ClothPlane::XZ);
+
+  Floor floor(&floorShader, clothWidth, clothHeight,
+              glm::vec3(xOffset, yOffset, zOffset));
 
   while (!glfwWindowShouldClose(window)) {
     float currentFrame = static_cast<float>(glfwGetTime());
@@ -142,7 +162,7 @@ int main(int argc, char *argv[]) {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    lightingShader.use();
+    clothShader.use();
 
     float aspect = (fbHeight != 0.0f) ? (fbWidth / fbHeight) : 1.3333f;
     glm::mat4 projection =
@@ -150,15 +170,22 @@ int main(int argc, char *argv[]) {
     glm::mat4 view = camera.getViewMatrix();
     glm::mat4 model = glm::mat4(1.0f);
 
-    lightingShader.setMat4("projection", projection);
-    lightingShader.setMat4("view", view);
-    lightingShader.setMat4("model", model);
+    clothShader.setMat4("projection", projection);
+    clothShader.setMat4("view", view);
+    clothShader.setMat4("model", model);
 
     cloth.setMatrices(projection, view, model);
-    cloth.run(deltaTime, 0.01f, glm::vec3(0.0f, -0.01f, 0.0f), 200.0f, 0.2f,
+    cloth.run(deltaTime, 0.01f, glm::vec3(0.0f, -1.0f, 0.0f), 500.0f, 0.1f,
               mouseState, static_cast<int>(fbWidth),
               static_cast<int>(fbHeight));
     cloth.render();
+
+    floorShader.use();
+
+    floorShader.setMat4("projection", projection);
+    floorShader.setMat4("view", view);
+    floorShader.setMat4("model", model);
+    floor.Draw();
 
     glfwSwapBuffers(window);
     glfwPollEvents();

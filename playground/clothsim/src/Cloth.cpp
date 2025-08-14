@@ -8,13 +8,8 @@ Cloth::Cloth(float clothWidth, float clothHeight, int numPointsWidth,
 
   spacing = clothWidth / (numWidth - 1);                 // Horizontal spacing
   float verticalSpacing = clothHeight / (numHeight - 1); // Vertical spacing
-  std::cout << "numWidth: " << numWidth << ", numHeight: " << numHeight
-            << std::endl;
-  std::cout << "numWidth * numHeight: " << numWidth * numHeight << std::endl;
   points.reserve(numWidth * numHeight);
   points.resize(numWidth * numHeight);
-  std::cout << "After points.resize, vertexArray.size(): " << vertexArray.size()
-            << std::endl;
 
   vertexArray.reserve(numWidth * numHeight);
   vertexArray.resize(numWidth * numHeight);
@@ -37,12 +32,25 @@ Cloth::Cloth(float clothWidth, float clothHeight, int numPointsWidth,
       case ClothPlane::YZ:
         pos = glm::vec3(xOffset, x * spacing + yOffset,
                         y * verticalSpacing + zOffset);
+
         break;
       }
 
       points[idx] = Point(pos.x, pos.y, pos.z);
-      if (y == 0)
+      if (plane == ClothPlane::XY && y == 0)
         points[idx].pin(); // Pin top row
+
+      if (plane == ClothPlane::XZ) {
+        bool isTopLeftCorner = (x == 0 && y == 0);
+        bool isTopRightCorner = (x == numWidth - 1 && y == 0);
+        bool isBottomLeftCorner = (x == 0 && y == numHeight - 1);
+        bool isBottomRightCorner = (x == numWidth - 1 && y == numHeight - 1);
+
+        if (isTopLeftCorner || isTopRightCorner || isBottomLeftCorner ||
+            isBottomRightCorner) {
+          points[idx].pin();
+        }
+      }
 
       vertexArray[idx].position = pos;
       // vertexArray[idx].normal = glm::vec3(0.0f, 0.0f, 1.0f);
@@ -196,6 +204,6 @@ void Cloth::render() {
   glDrawElements(GL_LINES, static_cast<GLsizei>(lineIndices.size()),
                  GL_UNSIGNED_INT, 0);
 
-  glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(vertexArray.capacity()));
+  // glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(vertexArray.capacity()));
   glBindVertexArray(0);
 }
