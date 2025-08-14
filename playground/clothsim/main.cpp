@@ -1,3 +1,4 @@
+#include <cmath>
 #include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
@@ -17,6 +18,7 @@
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
 #include <imgui/imgui.h>
+#include <limits>
 
 float fbWidth = 800.0f, fbHeight = 600.0f;
 
@@ -33,10 +35,10 @@ bool isSimPaused = false;
 
 bool cursorEnabled = false;
 
-float drag;
-glm::vec3 gravity;
-float springK;
-float elasticity;
+float drag = 0.01f;
+glm::vec3 gravity{0.0f, -1.0f, 0.0f};
+float springK = 500.0f;
+float elasticity = 0.1f;
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
@@ -117,9 +119,8 @@ int main(int argc, char *argv[]) {
 
     cloth.setMatrices(projection, view, model);
     if (!isSimPaused)
-      cloth.run(deltaTime, 0.01f, glm::vec3(0.0f, -1.0f, 0.0f), 500.0f, 0.1f,
-                mouseState, static_cast<int>(fbWidth),
-                static_cast<int>(fbHeight));
+      cloth.run(deltaTime, drag, gravity, springK, elasticity, mouseState,
+                static_cast<int>(fbWidth), static_cast<int>(fbHeight));
     cloth.render();
 
     floorShader.use();
@@ -177,8 +178,6 @@ void toggleCursor(GLFWwindow *window) {
 }
 
 void processInput(GLFWwindow *window) {
-  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-    glfwSetWindowShouldClose(window, true);
 
   static bool tabPressed = false;
 
@@ -287,20 +286,25 @@ void drawIMGUI() {
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
 
-  ImGui::Begin("Another Window",
-               &show_another_window); // Pass a pointer to our bool variable
-                                      // (the window will have a closing button
-                                      // that will clear the bool when clicked)
-  ImGui::SliderFloat("float", &f, 0.0f,
+  ImGui::Begin("Simulation Settings"); // Pass a pointer to our bool variable
+  ImGui::SliderFloat("Drag", &drag, 0.0f,
                      1.0f); // Edit 1 float using a slider from 0.0f to 1.0f
-  ImGui::ColorEdit3(
-      "clear color",
-      (float *)&clear_color); // Edit 3 floats representing a color
+  ImGui::SliderFloat3("Gravity", (float *)&gravity, -10.0f,
+                      10.0f); // Edit 3 floats representing a color
+  //
+  ImGui::SliderFloat("SpringK", &springK, 0.0f,
+                     10000.0f); // Edit 1 float using a slider from
+                                // 0.0f to 1.0f
+  //
+  ImGui::SliderFloat("Elasticity", &elasticity, 0.0f,
+                     100.0f); // Edit 1 float using a slider from
+                              // 0.0f to 1.0f
+
+  ImGui::Checkbox("PauseSim", &isSimPaused);
   ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
               1000.0f / io.Framerate, io.Framerate);
   ImGui::End();
-}
 
-ImGui::Render();
-ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+  ImGui::Render();
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
