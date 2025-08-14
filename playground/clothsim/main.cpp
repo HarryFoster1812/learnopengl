@@ -14,6 +14,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <imgui/backends/imgui_impl_glfw.h>
+#include <imgui/backends/imgui_impl_opengl3.h>
+#include <imgui/imgui.h>
 
 float fbWidth = 800.0f, fbHeight = 600.0f;
 
@@ -25,6 +28,118 @@ float lastFrame = 0.0f;
 
 MouseState mouseState;
 
+bool wasPausePressed = false; // outside your loop
+bool isSimPaused = false;
+
+bool cursorEnabled = false;
+
+float drag;
+glm::vec3 gravity;
+float springK;
+float elasticity;
+
+void framebuffer_size_callback(GLFWwindow *window, int width, int height);
+
+void cursor_position_callback(GLFWwindow *window, double xpos, double ypos);
+
+void toggleCursor(GLFWwindow *window);
+
+void processInput(GLFWwindow *window);
+
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
+
+GLFWwindow *setup();
+
+void initIMGUI(GLFWwindow *window);
+
+void drawIMGUI();
+
+int main(int argc, char *argv[]) {
+  (void)argc;
+  (void)argv;
+  GLFWwindow *window = setup();
+
+  initIMGUI(window);
+
+  camera.setMovementSpeed(10.0f);
+
+  glm::vec3 clothColour = glm::vec3(1.0f);
+  glm::vec3 floorColour = glm::vec3(1.0f, 0.0f, 0.0f);
+
+  Shader clothShader("shaders/vertex.vert", "shaders/fragment.frag");
+  clothShader.use();
+  clothShader.setVec3("colour", clothColour);
+
+  Shader floorShader("shaders/vertex.vert", "shaders/fragment.frag");
+  floorShader.use();
+  floorShader.setVec3("colour", floorColour);
+
+  // 4m x 2m cloth, 100 points across, 50 points down
+  float clothWidth = 50.0f;
+  float clothHeight = 50.0f;
+  float xOffset = -25.0f;
+  float yOffset = 20.0f;
+  float zOffset = -50.0f;
+
+  Cloth cloth(clothWidth,                // physical width in world units
+              clothHeight,               // physical height in world units
+              30,                        // points horizontally
+              30,                        // points vertically
+              xOffset, yOffset, zOffset, // offsets in world space
+              ClothPlane::XZ);
+
+  Floor floor(&floorShader, clothWidth, clothHeight,
+              glm::vec3(xOffset, yOffset, zOffset));
+
+  while (!glfwWindowShouldClose(window)) {
+    float currentFrame = static_cast<float>(glfwGetTime());
+    deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;
+
+    processInput(window);
+
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    drawIMGUI();
+
+    clothShader.use();
+
+    float aspect = (fbHeight != 0.0f) ? (fbWidth / fbHeight) : 1.3333f;
+    glm::mat4 projection =
+        glm::perspective(glm::radians(camera.getZoom()), aspect, 0.1f, 100.0f);
+    glm::mat4 view = camera.getViewMatrix();
+    glm::mat4 model = glm::mat4(1.0f);
+
+    clothShader.setMat4("projection", projection);
+    clothShader.setMat4("view", view);
+    clothShader.setMat4("model", model);
+
+    cloth.setMatrices(projection, view, model);
+    if (!isSimPaused)
+      cloth.run(deltaTime, 0.01f, glm::vec3(0.0f, -1.0f, 0.0f), 500.0f, 0.1f,
+                mouseState, static_cast<int>(fbWidth),
+                static_cast<int>(fbHeight));
+    cloth.render();
+
+    floorShader.use();
+
+    floorShader.setMat4("projection", projection);
+    floorShader.setMat4("view", view);
+    floorShader.setMat4("model", model);
+    floor.Draw();
+
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+  }
+
+  glfwTerminate();
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
+  ImGui::DestroyContext();
+  return 0;
+}
+
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
   (void)window;
   glViewport(0, 0, width, height);
@@ -33,6 +148,10 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 }
 
 void cursor_position_callback(GLFWwindow *window, double xpos, double ypos) {
+
+  if (cursorEnabled)
+    return;
+
   (void)window;
   if (mouseState.firstMouse) {
     mouseState.lastPos.x = static_cast<float>(xpos);
@@ -49,9 +168,27 @@ void cursor_position_callback(GLFWwindow *window, double xpos, double ypos) {
   camera.processMouseMovement(xoffset, yoffset);
 }
 
+void toggleCursor(GLFWwindow *window) {
+  cursorEnabled = !cursorEnabled;
+  glfwSetInputMode(window, GLFW_CURSOR,
+                   cursorEnabled ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+  mouseState.firstMouse =
+      true; // Prevent camera jump after enabling cursor again
+}
+
 void processInput(GLFWwindow *window) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
+
+  static bool tabPressed = false;
+
+  if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS && !tabPressed) {
+    toggleCursor(window);
+    tabPressed = true;
+  }
+  if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_RELEASE) {
+    tabPressed = false;
+  }
 
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     camera.processKeyboard(CameraMovement::FORWARD, deltaTime);
@@ -65,6 +202,14 @@ void processInput(GLFWwindow *window) {
     camera.processKeyboard(CameraMovement::UP, deltaTime);
   if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
     camera.processKeyboard(CameraMovement::DOWN, deltaTime);
+
+  bool isPPressed = (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS);
+
+  if (isPPressed && !wasPausePressed) {
+    isSimPaused = !isSimPaused; // toggle only once per key press
+  }
+
+  wasPausePressed = isPPressed; // update previous state
 
   mouseState.leftMousePressed =
       (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS);
@@ -118,79 +263,44 @@ GLFWwindow *setup() {
   return window;
 }
 
-int main(int argc, char *argv[]) {
-  (void)argc;
-  (void)argv;
-  GLFWwindow *window = setup();
-  camera.setMovementSpeed(10.0f);
+void initIMGUI(GLFWwindow *window) {
 
-  glm::vec3 clothColour = glm::vec3(1.0f);
-  glm::vec3 floorColour = glm::vec3(1.0f, 0.0f, 0.0f);
+  // Setup Dear ImGui context
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO &io = ImGui::GetIO();
+  io.ConfigFlags |=
+      ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+  io.ConfigFlags |=
+      ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
 
-  Shader clothShader("shaders/vertex.vert", "shaders/fragment.frag");
-  clothShader.use();
-  clothShader.setVec3("colour", clothColour);
+  // Setup Platform/Renderer backends
+  ImGui_ImplGlfw_InitForOpenGL(
+      window, true); // Second param install_callback=true will install
+                     // GLFW callbacks and chain to existing ones.
+  ImGui_ImplOpenGL3_Init();
+}
+void drawIMGUI() {
 
-  Shader floorShader("shaders/vertex.vert", "shaders/fragment.frag");
-  floorShader.use();
-  floorShader.setVec3("colour", floorColour);
+  ImGuiIO &io = ImGui::GetIO();
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
 
-  // 4m x 2m cloth, 100 points across, 50 points down
-  float clothWidth = 50.0f;
-  float clothHeight = 50.0f;
-  float xOffset = -25.0f;
-  float yOffset = 20.0f;
-  float zOffset = -50.0f;
+  ImGui::Begin("Another Window",
+               &show_another_window); // Pass a pointer to our bool variable
+                                      // (the window will have a closing button
+                                      // that will clear the bool when clicked)
+  ImGui::SliderFloat("float", &f, 0.0f,
+                     1.0f); // Edit 1 float using a slider from 0.0f to 1.0f
+  ImGui::ColorEdit3(
+      "clear color",
+      (float *)&clear_color); // Edit 3 floats representing a color
+  ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+              1000.0f / io.Framerate, io.Framerate);
+  ImGui::End();
+}
 
-  Cloth cloth(clothWidth,                // physical width in world units
-              clothHeight,               // physical height in world units
-              60,                        // points horizontally
-              60,                        // points vertically
-              xOffset, yOffset, zOffset, // offsets in world space
-              ClothPlane::XZ);
-
-  Floor floor(&floorShader, clothWidth, clothHeight,
-              glm::vec3(xOffset, yOffset, zOffset));
-
-  while (!glfwWindowShouldClose(window)) {
-    float currentFrame = static_cast<float>(glfwGetTime());
-    deltaTime = currentFrame - lastFrame;
-    lastFrame = currentFrame;
-
-    processInput(window);
-
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    clothShader.use();
-
-    float aspect = (fbHeight != 0.0f) ? (fbWidth / fbHeight) : 1.3333f;
-    glm::mat4 projection =
-        glm::perspective(glm::radians(camera.getZoom()), aspect, 0.1f, 100.0f);
-    glm::mat4 view = camera.getViewMatrix();
-    glm::mat4 model = glm::mat4(1.0f);
-
-    clothShader.setMat4("projection", projection);
-    clothShader.setMat4("view", view);
-    clothShader.setMat4("model", model);
-
-    cloth.setMatrices(projection, view, model);
-    cloth.run(deltaTime, 0.01f, glm::vec3(0.0f, -1.0f, 0.0f), 500.0f, 0.1f,
-              mouseState, static_cast<int>(fbWidth),
-              static_cast<int>(fbHeight));
-    cloth.render();
-
-    floorShader.use();
-
-    floorShader.setMat4("projection", projection);
-    floorShader.setMat4("view", view);
-    floorShader.setMat4("model", model);
-    floor.Draw();
-
-    glfwSwapBuffers(window);
-    glfwPollEvents();
-  }
-
-  glfwTerminate();
-  return 0;
+ImGui::Render();
+ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

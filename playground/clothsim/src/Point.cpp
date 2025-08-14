@@ -25,8 +25,8 @@ void Point::KeepInsideView(int width, int height) {
   (void)width;
   (void)height;
   // Simple floor "bounce"/clamp
-  if (pos.y < 0.0f) {
-    pos.y = 0.0f;
+  if (pos.y < 0.5f) {
+    pos.y = 0.5f;
     prevPos.y = pos.y;
   }
   // Side walls
@@ -37,6 +37,10 @@ void Point::KeepInsideView(int width, int height) {
   if (pos.x > 50.0f) {
     pos.x = 50.0f;
     prevPos.x = pos.x;
+  }
+  if (pos.y > 60.0f) {
+    pos.y = 60.0f;
+    prevPos.y = pos.y;
   }
 }
 
