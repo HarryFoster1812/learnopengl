@@ -13,14 +13,15 @@ The goal of this project is to build a strong understanding of OpenGL by working
 - GLAD for loading OpenGL functions
 - Exercises organized by tutorial section
 - Shader-based rendering (modern OpenGL)
-- Clean, well-commented code
 
 ## Dependencies
 
-To build and run the examples, you will need:
+To build and run the examples, you will need (installed on your system):
 
+- [OpenGL](https://www.opengl.org/)
 - [GLFW](https://www.glfw.org/)
 - [GLAD](https://glad.dav1d.de/)
-- [GLM](https://github.com/g-truc/glm) (optional, for math-heavy tutorials)
+- [GLM](https://github.com/g-truc/glm)
+- [ASSIMP](https://assimp.org/)
 - A C++17-compatible compiler
-- CMake (recommended for multi-platform builds)
+- CMake
