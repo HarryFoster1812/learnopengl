@@ -1,5 +1,6 @@
 #pragma once
 #include "Mouse.hpp"
+#include "Plane.hpp"
 #include "Point.hpp"
 #include "Spring.hpp"
 #include <cstddef>
@@ -28,6 +29,7 @@ private:
   std::vector<Spring> springs;
   std::vector<RenderVertex> vertexArray;
   std::vector<unsigned int> lineIndices;
+  std::vector<Plane *> planeColliders;
 
   unsigned int VAO = 0, VBO = 0, EBO = 0;
 
@@ -49,6 +51,14 @@ public:
   void run(float deltaTime, float drag, const glm::vec3 &gravity, float springK,
            float elasticity, MouseState &mouseState, int windowWidth,
            int windowHeight);
+
+  void setPointMass(float newMass) {
+    for (auto &point : points) {
+      point.setMass(newMass);
+    }
+  }
+
+  void addPlane(Plane *plane) { planeColliders.push_back(plane); }
 
   void render();
 };

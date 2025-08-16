@@ -8,8 +8,8 @@
 #include <iostream>
 
 #include "./src/Cloth.hpp"
-#include "./src/Floor.hpp"
 #include "./src/Mouse.hpp"
+#include "./src/Plane.hpp"
 #include <core/Camera.hpp>
 #include <core/Shader.hpp>
 
@@ -37,6 +37,8 @@ bool isSimPaused = false;
 bool cursorEnabled = false;
 
 float drag = 0.01f;
+float pointMass = 1.0f;
+float prevPointMass = 1.0f;
 glm::vec3 gravity{0.0f, -1.0f, 0.0f};
 float springK = 500.0f;
 float elasticity = 0.1f;
@@ -68,6 +70,7 @@ int main(int argc, char *argv[]) {
 
   glm::vec3 clothColour = glm::vec3(1.0f);
   glm::vec3 floorColour = glm::vec3(1.0f, 0.0f, 0.0f);
+  glm::vec3 rampColour = glm::vec3(0.5f, 0.5f, 0.0f);
 
   Shader clothShader("shaders/vertex.vert", "shaders/fragment.frag");
   clothShader.use();
@@ -76,6 +79,10 @@ int main(int argc, char *argv[]) {
   Shader floorShader("shaders/vertex.vert", "shaders/floorfragment.frag");
   floorShader.use();
   floorShader.setVec3("colour", floorColour);
+
+  Shader rampShader("shaders/vertex.vert", "shaders/floorfragment.frag");
+  rampShader.use();
+  rampShader.setVec3("colour", rampColour);
 
   // 4m x 2m cloth, 100 points across, 50 points down
   float clothWidth = 50.0f;
@@ -91,8 +98,13 @@ int main(int argc, char *argv[]) {
               xOffset, yOffset, zOffset, // offsets in world space
               ClothPlane::XZ);
 
-  Floor floor(&floorShader, clothWidth, clothHeight,
-              glm::vec3(xOffset, yOffset, zOffset));
+  Plane floor(&floorShader, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0),
+              glm::vec2(100, 100));
+  Plane ramp(&rampShader, glm::vec3(0, 0, 0),
+             glm::normalize(glm::vec3(0, 1, 1)), glm::vec2(50, 50));
+
+  cloth.addPlane(&floor);
+  cloth.addPlane(&ramp);
 
   while (!glfwWindowShouldClose(window)) {
     float currentFrame = static_cast<float>(glfwGetTime());
@@ -120,6 +132,11 @@ int main(int argc, char *argv[]) {
     clothShader.setVec2("u_resolution", glm::vec2(fbWidth, fbHeight));
 
     cloth.setMatrices(projection, view, model);
+    if (prevPointMass != pointMass) {
+      cloth.setPointMass(pointMass);
+      prevPointMass = pointMass;
+    }
+
     if (!isSimPaused)
       cloth.run(deltaTime, drag, gravity, springK, elasticity, mouseState,
                 static_cast<int>(fbWidth), static_cast<int>(fbHeight));
@@ -131,6 +148,12 @@ int main(int argc, char *argv[]) {
     floorShader.setMat4("view", view);
     floorShader.setMat4("model", model);
     floor.Draw();
+
+    rampShader.use();
+    rampShader.setMat4("projection", projection);
+    rampShader.setMat4("view", view);
+    rampShader.setMat4("model", model);
+    ramp.Draw();
 
     glfwSwapBuffers(window);
     glfwPollEvents();
@@ -291,18 +314,20 @@ void drawIMGUI() {
   ImGui::NewFrame();
 
   ImGui::Begin("Simulation Settings"); // Pass a pointer to our bool variable
+  ImGui::SliderFloat("Mass", &pointMass, 0.0f,
+                     10.0f); // Edit 1 float using a slider from 0.0f to 1.0f
   ImGui::SliderFloat("Drag", &drag, 0.0f,
                      1.0f); // Edit 1 float using a slider from 0.0f to 1.0f
   ImGui::SliderFloat3("Gravity", (float *)&gravity, -10.0f,
                       10.0f); // Edit 3 floats representing a color
   //
   ImGui::SliderFloat("SpringK", &springK, 0.0f,
-                     10000.0f); // Edit 1 float using a slider from
-                                // 0.0f to 1.0f
+                     1000.0f); // Edit 1 float using a slider from
+                               // 0.0f to 1.0f
   //
-  ImGui::SliderFloat("Elasticity", &elasticity, 0.0f,
-                     100.0f); // Edit 1 float using a slider from
-                              // 0.0f to 1.0f
+  ImGui::SliderFloat("Elasticity", &elasticity, -2.0f,
+                     2.0f); // Edit 1 float using a slider from
+                            // 0.0f to 1.0f
 
   ImGui::Checkbox("PauseSim", &isSimPaused);
   ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",

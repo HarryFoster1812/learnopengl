@@ -21,26 +21,9 @@ void Point::pin() { isPinned = true; }
 
 void Point::addSpring(Spring *spring) { attachedSprings.push_back(spring); }
 
-void Point::KeepInsideView(int width, int height) {
-  (void)width;
-  (void)height;
-  // Simple floor "bounce"/clamp
-  if (pos.y < 0.5f) {
-    pos.y = 0.5f;
-    prevPos.y = pos.y;
-  }
-  // Side walls
-  if (pos.x < -50.0f) {
-    pos.x = -50.0f;
-    prevPos.x = pos.x;
-  }
-  if (pos.x > 50.0f) {
-    pos.x = 50.0f;
-    prevPos.x = pos.x;
-  }
-  if (pos.y > 60.0f) {
-    pos.y = 60.0f;
-    prevPos.y = pos.y;
+void Point::resolveCollisions(const std::vector<Plane *> &planes) {
+  for (const auto &plane : planes) {
+    plane->resolveCollision(pos, prevPos);
   }
 }
 
@@ -94,14 +77,10 @@ void Point::update(float deltaTime, float drag, const glm::vec3 &acceleration,
     return;
   }
 
-  glm::vec3 effectiveAcc = acceleration + force; // mass = 1
+  glm::vec3 effectiveAcc = mass * acceleration + force; // mass = 1
 
   glm::vec3 newPos = pos + (pos - prevPos) * (1.0f - drag) +
                      effectiveAcc * (1.0f - drag) * deltaTime * deltaTime;
   prevPos = pos;
   pos = newPos;
-
-  KeepInsideView(windowWidth, windowHeight);
-
-  resetForce(); // Reset for next frame
 }
