@@ -41,6 +41,7 @@ Cloth::Cloth(float clothWidth, float clothHeight, int numPointsWidth,
       }
 
       points[idx] = Point(pos.x, pos.y, pos.z);
+
       if (plane == ClothPlane::XY && y == 0)
         points[idx].pin(); // Pin top row
 

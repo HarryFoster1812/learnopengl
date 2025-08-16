@@ -68,6 +68,7 @@ public:
   void resolveCollision(glm::vec3 &pointPos, glm::vec3 &prevPos) const {
     // Vector from plane center to point
     glm::vec3 toPoint = pointPos - pos;
+    glm::vec3 velocity = pointPos - prevPos;
 
     // Project onto plane normal
     float distance = glm::dot(toPoint, normal);
@@ -81,11 +82,21 @@ public:
     float halfX = glm::length(vertices[1] - vertices[0]) * 0.5f;
     float halfY = glm::length(vertices[3] - vertices[0]) * 0.5f;
 
+    const float epsilon = 0.001f; // small offset above plane
+
     // Check if inside rectangle
     if (x >= -halfX && x <= halfX && y >= -halfY && y <= halfY) {
       if (distance < 0.0f) { // point is "below" plane
-        pointPos -= distance * normal;
-        prevPos = pointPos;
+        glm::vec3 correction = (-distance + epsilon) * normal;
+        pointPos += correction;
+        prevPos += correction * 0.5f;
+
+        // Apply friction along plane to prevent wave slingshot
+        glm::vec3 normalVel = glm::dot(velocity, normal) * normal;
+        glm::vec3 tangentVel = velocity - normalVel;
+        tangentVel *= 0.8f; // damping along plane
+        velocity *= 0.99f;  // global damping
+        prevPos = pointPos - (normalVel + tangentVel);
       }
     }
   }

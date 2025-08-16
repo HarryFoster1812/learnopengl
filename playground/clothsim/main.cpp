@@ -36,11 +36,11 @@ bool isSimPaused = false;
 
 bool cursorEnabled = false;
 
-float drag = 0.01f;
+float drag = 0.20f;
 float pointMass = 1.0f;
 float prevPointMass = 1.0f;
-glm::vec3 gravity{0.0f, -1.0f, 0.0f};
-float springK = 500.0f;
+glm::vec3 gravity{0.0f, -9.0f, 0.0f};
+float springK = 100.0f;
 float elasticity = 0.1f;
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
@@ -93,8 +93,8 @@ int main(int argc, char *argv[]) {
 
   Cloth cloth(clothWidth,                // physical width in world units
               clothHeight,               // physical height in world units
-              30,                        // points horizontally
-              30,                        // points vertically
+              60,                        // points horizontally
+              60,                        // points vertically
               xOffset, yOffset, zOffset, // offsets in world space
               ClothPlane::XZ);
 
@@ -118,14 +118,26 @@ int main(int argc, char *argv[]) {
 
     drawIMGUI();
 
-    clothShader.use();
-
     float aspect = (fbHeight != 0.0f) ? (fbWidth / fbHeight) : 1.3333f;
     glm::mat4 projection =
         glm::perspective(glm::radians(camera.getZoom()), aspect, 0.1f, 100.0f);
     glm::mat4 view = camera.getViewMatrix();
     glm::mat4 model = glm::mat4(1.0f);
 
+    floorShader.use();
+
+    floorShader.setMat4("projection", projection);
+    floorShader.setMat4("view", view);
+    floorShader.setMat4("model", model);
+    floor.Draw();
+
+    rampShader.use();
+    rampShader.setMat4("projection", projection);
+    rampShader.setMat4("view", view);
+    rampShader.setMat4("model", model);
+    ramp.Draw();
+
+    clothShader.use();
     clothShader.setMat4("projection", projection);
     clothShader.setMat4("view", view);
     clothShader.setMat4("model", model);
@@ -141,19 +153,6 @@ int main(int argc, char *argv[]) {
       cloth.run(deltaTime, drag, gravity, springK, elasticity, mouseState,
                 static_cast<int>(fbWidth), static_cast<int>(fbHeight));
     cloth.render();
-
-    floorShader.use();
-
-    floorShader.setMat4("projection", projection);
-    floorShader.setMat4("view", view);
-    floorShader.setMat4("model", model);
-    floor.Draw();
-
-    rampShader.use();
-    rampShader.setMat4("projection", projection);
-    rampShader.setMat4("view", view);
-    rampShader.setMat4("model", model);
-    ramp.Draw();
 
     glfwSwapBuffers(window);
     glfwPollEvents();
