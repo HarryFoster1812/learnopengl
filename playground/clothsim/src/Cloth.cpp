@@ -13,7 +13,11 @@ Cloth::Cloth(float clothWidth, float clothHeight, int numPointsWidth,
 
   vertexArray.reserve(numWidth * numHeight);
   vertexArray.resize(numWidth * numHeight);
-  std::cout << vertexArray.size() << std::endl;
+
+  springs.reserve(
+      (numWidth - 1) * numHeight +
+      (numHeight - 1) *
+          numWidth); // reserve so that the pointers are not invalidated
 
   for (int y = 0; y < numHeight; ++y) {
     for (int x = 0; x < numWidth; ++x) {
@@ -57,10 +61,6 @@ Cloth::Cloth(float clothWidth, float clothHeight, int numPointsWidth,
       vertexArray[idx].texCoords =
           glm::vec2(static_cast<float>(x) / (numWidth - 1),
                     static_cast<float>(y) / (numHeight - 1));
-      std::cout << "(" << vertexArray[idx].position.x << ", " // x
-                << vertexArray[idx].position.y << ", "        // y
-                << vertexArray[idx].position.z                // x
-                << ")" << std::endl;
     }
   }
 
