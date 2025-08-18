@@ -51,17 +51,17 @@ Cloth::Cloth(float clothWidth, float clothHeight, int numPointsWidth,
       if (plane == ClothPlane::XY && y == 0)
         points[idx].pin(); // Pin top row
 
-      if (plane == ClothPlane::XZ) {
-        bool isTopLeftCorner = (x == 0 && y == 0);
-        bool isTopRightCorner = (x == numWidth - 1 && y == 0);
-        bool isBottomLeftCorner = (x == 0 && y == numHeight - 1);
-        bool isBottomRightCorner = (x == numWidth - 1 && y == numHeight - 1);
-
-        if (isTopLeftCorner || isTopRightCorner || isBottomLeftCorner ||
-            isBottomRightCorner) {
-          points[idx].pin();
-        }
-      }
+      // if (plane == ClothPlane::XZ) {
+      //   bool isTopLeftCorner = (x == 0 && y == 0);
+      //   bool isTopRightCorner = (x == numWidth - 1 && y == 0);
+      //   bool isBottomLeftCorner = (x == 0 && y == numHeight - 1);
+      //   bool isBottomRightCorner = (x == numWidth - 1 && y == numHeight - 1);
+      //
+      //   if (isTopLeftCorner || isTopRightCorner || isBottomLeftCorner ||
+      //       isBottomRightCorner) {
+      //     points[idx].pin();
+      //   }
+      // }
 
       vertexArray[idx].position = pos;
       vertexArray[idx].normal = glm::vec3(0.0f, 0.0f, 1.0f);

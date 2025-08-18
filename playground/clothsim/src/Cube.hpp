@@ -1,14 +1,29 @@
 #pragma once
 #include "CollidableObject.hpp"
 #include <algorithm>
+#include <core/Shader.hpp>
 
 class Cube : public CollidableObject {
 public:
   glm::vec3 size;
   glm::vec3 vertices[8];
+  unsigned int indices[36] = {// front
+                              0, 1, 2, 2, 3, 0,
+                              // right
+                              1, 5, 6, 6, 2, 1,
+                              // back
+                              7, 6, 5, 5, 4, 7,
+                              // left
+                              4, 0, 3, 3, 7, 4,
+                              // bottom
+                              4, 5, 1, 1, 0, 4,
+                              // top
+                              3, 2, 6, 6, 7, 3};
+  unsigned int VBO, VAO, EBO;
+  Shader *shader;
 
-  Cube(const glm::vec3 &center, const glm::vec3 &cubeSize)
-      : CollidableObject(center), size(cubeSize) {
+  Cube(const glm::vec3 &center, const glm::vec3 &cubeSize, Shader *shader)
+      : CollidableObject(center), size(cubeSize), shader(shader) {
     glm::vec3 half = size * 0.5f;
 
     vertices[0] = pos + glm::vec3(-half.x, -half.y, half.z);
@@ -20,6 +35,32 @@ public:
     vertices[5] = pos + glm::vec3(half.x, -half.y, -half.z);
     vertices[6] = pos + glm::vec3(half.x, half.y, -half.z);
     vertices[7] = pos + glm::vec3(-half.x, half.y, -half.z);
+
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
+                 GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3),
+                          (void *)0);
+    glEnableVertexAttribArray(0);
+
+    glBindVertexArray(0);
+  }
+
+  void Draw() {
+    shader->use();
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
   }
 
   void resolveCollision(glm::vec3 &pointPos,

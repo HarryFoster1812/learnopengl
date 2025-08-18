@@ -5,9 +5,11 @@
 
 #include <cstdlib>
 #include <glm/ext/vector_float2.hpp>
+#include <glm/ext/vector_float3.hpp>
 #include <iostream>
 
 #include "./src/Cloth.hpp"
+#include "./src/Cube.hpp"
 #include "./src/Mouse.hpp"
 #include "./src/Plane.hpp"
 #include <core/Camera.hpp>
@@ -73,9 +75,10 @@ int main(int argc, char *argv[]) {
   glm::vec3 floorColour = glm::vec3(1.0f, 0.0f, 0.0f);
   glm::vec3 rampColour = glm::vec3(0.5f, 0.5f, 0.0f);
 
-  Shader clothShader("shaders/vertex.vert", "shaders/fragment.frag");
+  Shader clothShader("shaders/wireframeVertex.vert", "shaders/fragment.frag");
   clothShader.use();
   clothShader.setVec3("colour", clothColour);
+  clothShader.setFloat("uDepthBias", 1e-3f); // tune between 1e-4 and 2e-3
 
   Shader floorShader("shaders/vertex.vert", "shaders/floorfragment.frag");
   floorShader.use();
@@ -90,19 +93,23 @@ int main(int argc, char *argv[]) {
   float clothHeight = 50.0f;
   float xOffset = 0.0f;
   float yOffset = 55.0f;
-  float zOffset = -20.0f;
+  float zOffset = -40.0f;
 
   Cloth cloth(clothWidth,                // physical width in world units
               clothHeight,               // physical height in world units
               20,                        // points horizontally
               20,                        // points vertically
               xOffset, yOffset, zOffset, // offsets in world space
-              ClothPlane::XY);
+              ClothPlane::XZ);
 
   Plane floor(&floorShader, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0),
               glm::vec2(100, 100));
 
+  Cube cube(glm::vec3(10.0f, 20.0f, 0.0f), glm::vec3(20.0f, 20.0f, 20.0f),
+            &rampShader);
+
   cloth.addObject(&floor);
+  cloth.addObject(&cube);
 
   while (!glfwWindowShouldClose(window)) {
     float currentFrame = static_cast<float>(glfwGetTime());
@@ -128,6 +135,12 @@ int main(int argc, char *argv[]) {
     floorShader.setMat4("view", view);
     floorShader.setMat4("model", model);
     floor.Draw();
+
+    rampShader.use();
+    rampShader.setMat4("projection", projection);
+    rampShader.setMat4("view", view);
+    rampShader.setMat4("model", model);
+    cube.Draw();
 
     clothShader.use();
     clothShader.setMat4("projection", projection);
