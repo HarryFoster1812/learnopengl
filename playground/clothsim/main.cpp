@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
   Plane floor(&floorShader, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0),
               glm::vec2(100, 100));
 
-  cloth.addPlane(&floor);
+  cloth.addObject(&floor);
 
   while (!glfwWindowShouldClose(window)) {
     float currentFrame = static_cast<float>(glfwGetTime());

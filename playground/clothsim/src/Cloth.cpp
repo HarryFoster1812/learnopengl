@@ -245,7 +245,7 @@ void Cloth::run(float deltaTime, float drag, const glm::vec3 &gravity,
   for (auto &point : points) {
     point.update(deltaTime, drag, gravity, elasticity, mouseState, windowWidth,
                  windowHeight, projectionMatrix, viewMatrix, modelMatrix);
-    point.resolveCollisions(planeColliders);
+    point.resolveCollisions(objectColliders);
   }
 
   updateVertices();

@@ -29,7 +29,7 @@ private:
   std::vector<Spring> springs;
   std::vector<RenderVertex> vertexArray;
   std::vector<unsigned int> lineIndices;
-  std::vector<CollidableObject *> planeColliders;
+  std::vector<CollidableObject *> objectColliders;
 
   unsigned int VAO = 0, VBO = 0, EBO = 0;
 
@@ -58,7 +58,9 @@ public:
     }
   }
 
-  void addPlane(CollidableObject *object) { planeColliders.push_back(object); }
+  void addObject(CollidableObject *object) {
+    objectColliders.push_back(object);
+  }
 
   void render();
 };
