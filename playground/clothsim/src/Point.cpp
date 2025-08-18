@@ -42,7 +42,7 @@ void Point::update(float deltaTime, float drag, const glm::vec3 &acceleration,
 
   glm::vec2 mouseDir = point2D - glm::vec2(windowWidth / 2, windowHeight / 2);
   float mouseDist = glm::length(mouseDir);
-  isSelected = mouseDist < 20.0f; // Selection radius in pixels
+  isSelected = mouseDist < 30.0f; // Selection radius in pixels
 
   if (mouseState.leftMousePressed && isSelected) {
     // Unproject current and last mouse to world using the depth from
