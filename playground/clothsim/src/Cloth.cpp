@@ -142,10 +142,32 @@ Cloth::Cloth(float clothWidth, float clothHeight, int numPointsWidth,
     }
   }
 
+  for (int y = 0; y < numHeight - 1; ++y) {
+    for (int x = 0; x < numWidth - 1; ++x) {
+      int topLeft = y * numWidth + x;
+      int topRight = y * numWidth + (x + 1);
+      int bottomLeft = (y + 1) * numWidth + x;
+      int bottomRight = (y + 1) * numWidth + (x + 1);
+
+      // triangle 1
+      triIndices.push_back(topLeft);
+      triIndices.push_back(bottomLeft);
+      triIndices.push_back(topRight);
+
+      // triangle 2
+      triIndices.push_back(topRight);
+      triIndices.push_back(bottomLeft);
+      triIndices.push_back(bottomRight);
+    }
+  }
+
+  // Once during cloth initialization
+
   // Setup OpenGL buffers
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
-  glGenBuffers(1, &EBO);
+  glGenBuffers(1, &EBO_lines);
+  glGenBuffers(1, &EBO_tri);
 
   glBindVertexArray(VAO);
 
@@ -153,10 +175,15 @@ Cloth::Cloth(float clothWidth, float clothHeight, int numPointsWidth,
   glBufferData(GL_ARRAY_BUFFER, vertexArray.capacity() * sizeof(RenderVertex),
                vertexArray.data(), GL_DYNAMIC_DRAW);
 
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_lines);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER,
                lineIndices.size() * sizeof(unsigned int), lineIndices.data(),
                GL_DYNAMIC_DRAW);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_tri);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+               triIndices.size() * sizeof(unsigned int), triIndices.data(),
+               GL_STATIC_DRAW); // indices never change
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(RenderVertex),
                         (void *)0);
@@ -176,8 +203,10 @@ Cloth::~Cloth() {
     glDeleteVertexArrays(1, &VAO);
   if (VBO)
     glDeleteBuffers(1, &VBO);
-  if (EBO)
-    glDeleteBuffers(1, &EBO);
+  if (EBO_lines)
+    glDeleteBuffers(1, &EBO_lines);
+  if (EBO_tri)
+    glDeleteBuffers(1, &EBO_tri);
 }
 
 void Cloth::setMatrices(const glm::mat4 &proj, const glm::mat4 &view,
@@ -210,7 +239,7 @@ void Cloth::updateVertices() {
     }
   }
   glBindVertexArray(VAO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_lines);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER,
                lineIndices.size() * sizeof(unsigned int), lineIndices.data(),
                GL_DYNAMIC_DRAW);
@@ -251,10 +280,19 @@ void Cloth::run(float deltaTime, float drag, const glm::vec3 &gravity,
   updateVertices();
 }
 
-void Cloth::render() {
+void Cloth::render(bool wireframe) {
   glBindVertexArray(VAO);
-  glDrawElements(GL_LINES, static_cast<GLsizei>(lineIndices.size()),
-                 GL_UNSIGNED_INT, 0);
+  if (wireframe) {
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_lines);
+    glDrawElements(GL_LINES, static_cast<GLsizei>(lineIndices.size()),
+                   GL_UNSIGNED_INT, 0);
+  } else {
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_tri);
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(triIndices.size()),
+                   GL_UNSIGNED_INT, 0);
+  }
 
   // glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(vertexArray.capacity()));
   glBindVertexArray(0);

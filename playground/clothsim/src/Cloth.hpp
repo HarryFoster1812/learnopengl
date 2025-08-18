@@ -29,9 +29,10 @@ private:
   std::vector<Spring> springs;
   std::vector<RenderVertex> vertexArray;
   std::vector<unsigned int> lineIndices;
+  std::vector<unsigned int> triIndices;
   std::vector<CollidableObject *> objectColliders;
 
-  unsigned int VAO = 0, VBO = 0, EBO = 0;
+  unsigned int VAO = 0, VBO = 0, EBO_lines = 0, EBO_tri = 0;
 
   glm::mat4 modelMatrix{1.0f};
   glm::mat4 viewMatrix{1.0f};
@@ -62,5 +63,5 @@ public:
     objectColliders.push_back(object);
   }
 
-  void render();
+  void render(bool wireframe = false);
 };

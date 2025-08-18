@@ -21,7 +21,6 @@
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
 #include <imgui/imgui.h>
-#include <limits>
 
 float fbWidth = 800.0f, fbHeight = 600.0f;
 
@@ -38,6 +37,7 @@ bool wasPausePressed = false; // outside your loop
 bool isSimPaused = false;
 
 bool cursorEnabled = false;
+bool wireframe = false;
 
 float drag = 0.10f;
 float pointMass = 2.0f;
@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
     if (!isSimPaused)
       cloth.run(timeStep, drag, gravity, springK, elasticity, mouseState,
                 static_cast<int>(fbWidth), static_cast<int>(fbHeight));
-    cloth.render();
+    cloth.render(wireframe);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
@@ -334,6 +334,7 @@ void drawIMGUI() {
                             // 0.0f to 1.0f
 
   ImGui::Checkbox("PauseSim", &isSimPaused);
+  ImGui::Checkbox("Wireframe", &wireframe);
   ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
               1000.0f / io.Framerate, io.Framerate);
   ImGui::End();
