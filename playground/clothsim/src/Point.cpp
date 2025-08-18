@@ -21,9 +21,9 @@ void Point::pin() { isPinned = true; }
 
 void Point::addSpring(Spring *spring) { attachedSprings.push_back(spring); }
 
-void Point::resolveCollisions(const std::vector<Plane *> &planes) {
-  for (const auto &plane : planes) {
-    plane->resolveCollision(pos, prevPos);
+void Point::resolveCollisions(const std::vector<CollidableObject *> &objects) {
+  for (const auto &object : objects) {
+    object->resolveCollision(pos, prevPos);
   }
 }
 

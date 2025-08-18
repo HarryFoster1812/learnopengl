@@ -1,5 +1,5 @@
 #pragma once
-#include "Plane.hpp"
+#include "CollidableObject.hpp"
 #include <glm/glm.hpp>
 #include <vector>
 
@@ -42,5 +42,5 @@ public:
               const glm::mat4 &view, const glm::mat4 &model);
   void setMass(const float newMass) { mass = newMass; }
 
-  void resolveCollisions(const std::vector<Plane *> &planes);
+  void resolveCollisions(const std::vector<CollidableObject *> &objects);
 };

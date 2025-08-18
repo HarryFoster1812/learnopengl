@@ -1,6 +1,14 @@
 #include "Cloth.hpp"
 #include <iostream>
 
+int countSprings(int numWidth, int numHeight) {
+  int structural = (numWidth - 1) * numHeight + (numHeight - 1) * numWidth;
+  int shearing = 2 * (numWidth - 1) * (numHeight - 1);
+  int bending = (numWidth - 2) * numHeight + (numHeight - 2) * numWidth;
+
+  return structural + shearing + bending;
+}
+
 Cloth::Cloth(float clothWidth, float clothHeight, int numPointsWidth,
              int numPointsHeight, float xOffset, float yOffset, float zOffset,
              ClothPlane plane)
@@ -14,10 +22,8 @@ Cloth::Cloth(float clothWidth, float clothHeight, int numPointsWidth,
   vertexArray.reserve(numWidth * numHeight);
   vertexArray.resize(numWidth * numHeight);
 
-  springs.reserve(
-      (numWidth - 1) * numHeight +
-      (numHeight - 1) *
-          numWidth); // reserve so that the pointers are not invalidated
+  springs.reserve(countSprings(
+      numWidth, numHeight)); // reserve so that the pointers are not invalidated
 
   for (int y = 0; y < numHeight; ++y) {
     for (int x = 0; x < numWidth; ++x) {
@@ -65,21 +71,65 @@ Cloth::Cloth(float clothWidth, float clothHeight, int numPointsWidth,
     }
   }
 
-  // Create structural springs
+  // Structural springs
   for (int y = 0; y < numHeight; ++y) {
     for (int x = 0; x < numWidth; ++x) {
       int idx = y * numWidth + x;
-      if (x < numWidth - 1) {
+
+      if (x < numWidth - 1) { // right neighbor
         springs.emplace_back(&points[idx], &points[idx + 1], spacing, idx,
                              idx + 1);
         points[idx].addSpring(&springs.back());
         points[idx + 1].addSpring(&springs.back());
       }
-      if (y < numHeight - 1) {
+      if (y < numHeight - 1) { // bottom neighbor
         springs.emplace_back(&points[idx], &points[idx + numWidth],
                              verticalSpacing, idx, idx + numWidth);
         points[idx].addSpring(&springs.back());
         points[idx + numWidth].addSpring(&springs.back());
+      }
+    }
+  }
+
+  // Shearing springs (diagonals)
+  for (int y = 0; y < numHeight - 1; ++y) {
+    for (int x = 0; x < numWidth - 1; ++x) {
+      int idx = y * numWidth + x;
+
+      // bottom-right diagonal
+      springs.emplace_back(
+          &points[idx], &points[idx + numWidth + 1],
+          std::sqrt(spacing * spacing + verticalSpacing * verticalSpacing), idx,
+          idx + numWidth + 1);
+      points[idx].addSpring(&springs.back());
+      points[idx + numWidth + 1].addSpring(&springs.back());
+
+      // bottom-left diagonal
+      springs.emplace_back(
+          &points[idx + 1], &points[idx + numWidth],
+          std::sqrt(spacing * spacing + verticalSpacing * verticalSpacing),
+          idx + 1, idx + numWidth);
+      points[idx + 1].addSpring(&springs.back());
+      points[idx + numWidth].addSpring(&springs.back());
+    }
+  }
+
+  // Bending springs (skip one point)
+  for (int y = 0; y < numHeight; ++y) {
+    for (int x = 0; x < numWidth; ++x) {
+      int idx = y * numWidth + x;
+
+      if (x < numWidth - 2) { // 2 to the right
+        springs.emplace_back(&points[idx], &points[idx + 2], spacing * 2, idx,
+                             idx + 2);
+        points[idx].addSpring(&springs.back());
+        points[idx + 2].addSpring(&springs.back());
+      }
+      if (y < numHeight - 2) { // 2 below
+        springs.emplace_back(&points[idx], &points[idx + 2 * numWidth],
+                             verticalSpacing * 2, idx, idx + 2 * numWidth);
+        points[idx].addSpring(&springs.back());
+        points[idx + 2 * numWidth].addSpring(&springs.back());
       }
     }
   }

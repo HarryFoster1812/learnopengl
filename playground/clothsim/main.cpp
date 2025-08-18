@@ -27,6 +27,7 @@ Camera camera(glm::vec3(0.0f, 20.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f,
               0.0f);
 
 float deltaTime = 0.0f;
+float timeStep = 0.0166666666667f;
 float lastFrame = 0.0f;
 
 MouseState mouseState;
@@ -36,10 +37,10 @@ bool isSimPaused = false;
 
 bool cursorEnabled = false;
 
-float drag = 0.20f;
-float pointMass = 1.0f;
-float prevPointMass = 1.0f;
-glm::vec3 gravity{0.0f, -9.0f, 0.0f};
+float drag = 0.10f;
+float pointMass = 2.0f;
+float prevPointMass = 2.0f;
+glm::vec3 gravity{0.0f, -9.80665f, 0.0f};
 float springK = 100.0f;
 float elasticity = 0.1f;
 
@@ -87,24 +88,21 @@ int main(int argc, char *argv[]) {
   // 4m x 2m cloth, 100 points across, 50 points down
   float clothWidth = 50.0f;
   float clothHeight = 50.0f;
-  float xOffset = -25.0f;
-  float yOffset = 20.0f;
-  float zOffset = -50.0f;
+  float xOffset = 0.0f;
+  float yOffset = 55.0f;
+  float zOffset = -20.0f;
 
   Cloth cloth(clothWidth,                // physical width in world units
               clothHeight,               // physical height in world units
-              60,                        // points horizontally
-              60,                        // points vertically
+              20,                        // points horizontally
+              20,                        // points vertically
               xOffset, yOffset, zOffset, // offsets in world space
-              ClothPlane::XZ);
+              ClothPlane::XY);
 
   Plane floor(&floorShader, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0),
               glm::vec2(100, 100));
-  Plane ramp(&rampShader, glm::vec3(0, 0, 0),
-             glm::normalize(glm::vec3(0, 1, 1)), glm::vec2(50, 50));
 
   cloth.addPlane(&floor);
-  cloth.addPlane(&ramp);
 
   while (!glfwWindowShouldClose(window)) {
     float currentFrame = static_cast<float>(glfwGetTime());
@@ -131,12 +129,6 @@ int main(int argc, char *argv[]) {
     floorShader.setMat4("model", model);
     floor.Draw();
 
-    rampShader.use();
-    rampShader.setMat4("projection", projection);
-    rampShader.setMat4("view", view);
-    rampShader.setMat4("model", model);
-    ramp.Draw();
-
     clothShader.use();
     clothShader.setMat4("projection", projection);
     clothShader.setMat4("view", view);
@@ -150,7 +142,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (!isSimPaused)
-      cloth.run(deltaTime, drag, gravity, springK, elasticity, mouseState,
+      cloth.run(timeStep, drag, gravity, springK, elasticity, mouseState,
                 static_cast<int>(fbWidth), static_cast<int>(fbHeight));
     cloth.render();
 

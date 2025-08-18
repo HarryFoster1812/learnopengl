@@ -1,9 +1,10 @@
 #pragma once
-#include "Shader.hpp"
+#include "CollidableObject.hpp"
+#include <core/Shader.hpp>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
-class Plane {
+class Plane : public CollidableObject {
 public:
   unsigned int VAO, VBO, EBO;
   Shader *shader;
@@ -11,14 +12,13 @@ public:
   glm::vec3 vertices[4];
   unsigned int indices[6] = {0, 1, 2, 2, 3, 0};
   glm::vec3 normal;
-  glm::vec3 pos;
   glm::vec3 tangent;
   glm::vec3 bitangent;
 
   // Constructor
   Plane(Shader *shaderPtr, const glm::vec3 &center, const glm::vec3 &normal,
         const glm::vec2 &size)
-      : shader(shaderPtr), pos(center), normal(normal) {
+      : shader(shaderPtr), CollidableObject(center), normal(normal) {
 
     // Compute tangent and bitangent safely
     glm::vec3 n = glm::normalize(normal);
@@ -65,38 +65,38 @@ public:
     glBindVertexArray(0);
   }
 
-  void resolveCollision(glm::vec3 &pointPos, glm::vec3 &prevPos) const {
+  void resolveCollision(glm::vec3 &pointPos,
+                        glm::vec3 &prevPos) const override {
+    const float epsilon =
+        0.01f; // how far from the plane we allow before correction
+    const float stiffness = 0.5f; // fraction of correction to apply
+
     // Vector from plane center to point
     glm::vec3 toPoint = pointPos - pos;
-    glm::vec3 velocity = pointPos - prevPos;
 
-    // Project onto plane normal
+    // Distance along plane normal (signed)
     float distance = glm::dot(toPoint, normal);
 
-    // Project onto tangent axes
+    // Only apply if point is very close or penetrating
+    if (distance < epsilon) {
+      // Convert to plane local space
+      float localX = glm::dot(toPoint, tangent);
+      float localY = glm::dot(toPoint, bitangent);
 
-    float x = glm::dot(toPoint, tangent);
-    float y = glm::dot(toPoint, bitangent);
+      // Half sizes
+      float halfX = glm::length(vertices[1] - vertices[0]) * 0.5f;
+      float halfY = glm::length(vertices[3] - vertices[0]) * 0.5f;
 
-    // Half sizes
-    float halfX = glm::length(vertices[1] - vertices[0]) * 0.5f;
-    float halfY = glm::length(vertices[3] - vertices[0]) * 0.5f;
+      // Only correct if within or near the rectangle bounds
+      if (localX >= -halfX - epsilon && localX <= halfX + epsilon &&
+          localY >= -halfY - epsilon && localY <= halfY + epsilon) {
 
-    const float epsilon = 0.001f; // small offset above plane
-
-    // Check if inside rectangle
-    if (x >= -halfX && x <= halfX && y >= -halfY && y <= halfY) {
-      if (distance < 0.0f) { // point is "below" plane
-        glm::vec3 correction = (-distance + epsilon) * normal;
+        // Project point onto plane (soft correction)
+        glm::vec3 correction = (epsilon - distance) * normal * stiffness;
         pointPos += correction;
-        prevPos += correction * 0.5f;
 
-        // Apply friction along plane to prevent wave slingshot
-        glm::vec3 normalVel = glm::dot(velocity, normal) * normal;
-        glm::vec3 tangentVel = velocity - normalVel;
-        tangentVel *= 0.8f; // damping along plane
-        velocity *= 0.99f;  // global damping
-        prevPos = pointPos - (normalVel + tangentVel);
+        // Apply small fraction to previous position to reduce snapping
+        prevPos += correction * 0.5f;
       }
     }
   }

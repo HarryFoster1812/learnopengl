@@ -1,6 +1,6 @@
 #pragma once
+#include "CollidableObject.hpp"
 #include "Mouse.hpp"
-#include "Plane.hpp"
 #include "Point.hpp"
 #include "Spring.hpp"
 #include <cstddef>
@@ -29,7 +29,7 @@ private:
   std::vector<Spring> springs;
   std::vector<RenderVertex> vertexArray;
   std::vector<unsigned int> lineIndices;
-  std::vector<Plane *> planeColliders;
+  std::vector<CollidableObject *> planeColliders;
 
   unsigned int VAO = 0, VBO = 0, EBO = 0;
 
@@ -58,7 +58,7 @@ public:
     }
   }
 
-  void addPlane(Plane *plane) { planeColliders.push_back(plane); }
+  void addPlane(CollidableObject *object) { planeColliders.push_back(object); }
 
   void render();
 };
